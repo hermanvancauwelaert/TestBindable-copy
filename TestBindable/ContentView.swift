@@ -27,11 +27,6 @@ struct ContentView: View {
                 NSApplication.shared.terminate(nil)
             }
             .padding()
-            #elseif os(iOS)
-            Button("Close") {
-                UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
-            }
-            .padding()
             #endif
         }
         .onChange(of: scenePhase) { _, newPhase in
