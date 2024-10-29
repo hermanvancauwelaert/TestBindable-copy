@@ -1,62 +1,43 @@
 import SwiftUI
 import SwiftData
-//test
+//test ploep
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
-    @Query private var allCounterModels: [CounterModel] // Retrieve all instances
-    private var counterModel: CounterModel? {
-        allCounterModels.first
-    }
-
+    @Environment(\.scenePhase) private var scenePhase
+    @Query private var counters: [CounterModel]
+    
     var body: some View {
         VStack {
-            Text("Count: \(counterModel?.count ?? 0)")
+            Text("\(counters[0].count)")
                 .font(.largeTitle)
                 .padding()
             HStack {
                 Button("Increment") {
-                    incrementCount()
+                    counters[0].count += 1
                 }
                 Button("Decrement") {
-                    decrementCount()
+                    counters[0].count -= 1
                 }
             }
             .padding()
+            
+            #if os(macOS)
+            Button("Quit") {
+                NSApplication.shared.terminate(nil)
+            }
+            .padding()
+            #elseif os(iOS)
+            Button("Close") {
+                UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+            }
+            .padding()
+            #endif
         }
-        .onAppear {
-            createCounterModelIfNeeded()
-        }
-    }
-
-    private func createCounterModelIfNeeded() {
-        // Check if a CounterModel already exists in the context; if not, create one.
-        if counterModel == nil {
-            let newCounter = CounterModel(count: 0)
-            context.insert(newCounter)
-            saveChanges()
-        }
-    }
-
-    private func incrementCount() {
-        if let model = counterModel {
-            model.count += 1
-            saveChanges()
-        }
-    }
-
-    private func decrementCount() {
-        if let model = counterModel {
-            model.count -= 1
-            saveChanges()
-        }
-    }
-
-    private func saveChanges() {
-        do {
-            try context.save()
-        } catch {
-            print("Failed to save context: \(error)")
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .inactive {
+                try? context.save()
+            }
         }
     }
 }

@@ -16,5 +16,18 @@ import Foundation
     init(count: Int = 0) {
         self.count = count
     }
+
+    static func getOrCreate(context: ModelContext) -> CounterModel {
+        let descriptor = FetchDescriptor<CounterModel>()
+        let existing = try? context.fetch(descriptor)
+        
+        if let first = existing?.first {
+            return first
+        } else {
+            let counter = CounterModel()
+            context.insert(counter)
+            return counter
+        }
+    }
 }
 

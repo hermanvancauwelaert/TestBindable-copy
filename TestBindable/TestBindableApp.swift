@@ -10,23 +10,17 @@ import SwiftData
 
 @main
 struct TestBindableApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            CounterModel.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+    let container = try! ModelContainer(for: CounterModel.self)
+    
+    init() {
+        // Initialize the counter when app starts
+        let _ = CounterModel.getOrCreate(context: container.mainContext)
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView( )
+            ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container)
     }
 }
